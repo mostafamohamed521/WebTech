@@ -108,25 +108,21 @@ Authentication · Users · Products · Categories · Brands · Inventory · Cart
 
 ## الحالة الحالية للمشروع
 
-**تحديث 2:** دورة الشراء كاملة شغالة فعليًا من الأول للآخر (register → add address → add to cart → checkout → order):
+**تحديث 3:** صفحة المنتج الكاملة شغالة فعليًا مع نظام تقييمات ومفضلة حقيقيين:
 
-- **Backend (مُختبر بالكامل، 5 تطبيقات جديدة):**
-  - `addresses`: CRUD كامل للعناوين مع عنوان افتراضي واحد بس
-  - `coupons`: تحقق كامل (صلاحية، حد أدنى للشراء، حد استخدام، منع الاستخدام المكرر)
-  - `cart`: كارت للضيف (بـ session key) وكارت للمستخدم، مع **دمج تلقائي** لكارت الضيف بكارت المستخدم عند تسجيل الدخول
-  - `orders`: `OrderService.checkout()` بيحوّل الكارت لأوردر حقيقي — بيحسب الضريبة (14% VAT) والشحن (50 جنيه ثابت)، بيقلل المخزون فعليًا، بينشئ `OrderStatusHistory`، وبيفضي الكارت تلقائيًا
-  - `payments`: **COD شغال بالكامل** (بيأكد الأوردر تلقائيًا)، و Stripe/PayPal جاهزين كـ pluggable gateway (نقطة `_charge_via_gateway` جاهزة للتفعيل بمفاتيح API حقيقية)
-  - ده كله اتعمله **اختبار حي فعلي**: عملت seed لمنتج، سجلت مستخدم، ضفت عنوان، حطيت المنتج في الكارت، عملت checkout كامل، وشفت الـ order response بكل التفاصيل صحيحة (الضريبة والشحن والإجمالي محسوبين صح)
-  - اكتشفت وصلحت 2 bugs حقيقية أثناء الاختبار (مشاكل default values في الـ serializers) — موثقة في الـ commits
+- **Backend (تطبيقين جديدين، مُختبرين حي):**
+  - `reviews`: تقييم بالنجوم + تعليق، **verified purchase** بيتحقق تلقائيًا من `OrderItem` الحقيقي، تجميع متوسط التقييم وتوزيع النجوم (1-5)، helpful votes قابلة للتبديل (toggle). اتعمله اختبار حي: نشر review فعلي، وشوفت الـ summary (average 5.0) راجع صح.
+  - `wishlist`: إضافة/حذف/عرض، مربوط بمنتجات حقيقية.
 
-- **Frontend:**
-  - صفحة Cart حقيقية: تعديل الكمية، حذف بأنيميشن، ملخص السعر
-  - صفحة Checkout حقيقية: اختيار/إضافة عنوان، اختيار طريقة الدفع، تأكيد الطلب
-  - صفحة تفاصيل الطلب: Timeline كامل + ملخص الفاتورة
-  - عداد الكارت في الـ Navbar بقى مربوط بالباك اند الحقيقي بدل تخزين محلي وهمي
+- **Frontend — صفحة المنتج كاملة (`/product/:slug`):**
+  - **3D Viewer تفاعلي حقيقي** بـ OrbitControls: drag لتدوير المنتج، scroll للزووم، auto-rotate وقت الخمول، ولون الموديل بيتغير حسب الـ variant المختار
+  - اختيار الفاريانت (لون/سعة/رام) وتحديث السعر تلقائيًا
+  - إضافة للسلة والمفضلة، جدول المواصفات الكامل
+  - قسم تقييمات كامل: ملخص بصري لتوزيع النجوم، فورم كتابة تقييم (للمسجلين بس)، وزر "helpful" تفاعلي
+  - منتجات مشابهة (related products) من نفس التصنيف
 
-- **باقي الـ 9 تطبيقات** (`wishlist`, `reviews`, `notifications`, `analytics`, `dashboard`, `search`, `support`, `inventory`) لسه على شكل الهيكل الأساسي.
-- **باقي صفحات الفرونت اند** (Category, Product Detail بالـ 3D viewer, Account Dashboard, Compare, Wishlist, Admin Dashboard) لسه هيكل فاضي.
+- **باقي الـ 7 تطبيقات** (`notifications`, `analytics`, `dashboard`, `search`, `support`, `inventory`) لسه على شكل الهيكل الأساسي.
+- **باقي صفحات الفرونت اند** (Category, Account Dashboard, Compare, Admin panel) لسه هيكل فاضي.
 
 كل ملف اتعمل أو اتعدل، اتعمله `git add` + `git commit -m "..."` منفصل، زي ما هو موضح في `backend/README.md` و `frontend/README.md`.
 
