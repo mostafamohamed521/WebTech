@@ -1,0 +1,11 @@
+from django.apps import AppConfig
+
+
+class ProductsConfig(AppConfig):
+    """Configuration for the products app.
+
+    Purpose: Core product catalog: products, variants, specs, images, tags.
+    """
+    default_auto_field = "django.db.models.BigAutoField"
+    name = "apps.products"
+    verbose_name = "Products"
