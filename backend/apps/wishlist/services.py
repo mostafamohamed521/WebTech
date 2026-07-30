@@ -1,16 +1,33 @@
 """
 Service layer for the wishlist app.
-
-Purpose: User wishlists and wishlist items.
-
-All business logic for this app MUST live here (per WEBTECH Clean
-Architecture rule): Views -> Serializers -> Services -> Models -> DB.
-Views must never contain business rules directly.
 """
+from rest_framework.exceptions import ValidationError
+from apps.products.models import Product
+from .models import Wishlist, WishlistItem
 
 
 class WishlistService:
-    """Encapsulates business logic for wishlist."""
+    @staticmethod
+    def get_or_create(user) -> Wishlist:
+        wishlist, _ = Wishlist.objects.get_or_create(user=user)
+        return wishlist
 
-    # TODO: Implement wishlist business logic methods here.
-    pass
+    @staticmethod
+    def add(user, product_id) -> WishlistItem:
+        wishlist = WishlistService.get_or_create(user)
+        try:
+            product = Product.objects.get(id=product_id, is_deleted=False)
+        except Product.DoesNotExist:
+            raise ValidationError({"product_id": ["Product not found."]})
+        item, _ = WishlistItem.objects.get_or_create(wishlist=wishlist, product=product)
+        return item
+
+    @staticmethod
+    def remove(user, product_id):
+        wishlist = WishlistService.get_or_create(user)
+        WishlistItem.objects.filter(wishlist=wishlist, product_id=product_id).delete()
+
+    @staticmethod
+    def list_items(user):
+        wishlist = WishlistService.get_or_create(user)
+        return wishlist.items.select_related("product").all()
