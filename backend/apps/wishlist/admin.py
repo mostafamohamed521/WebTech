@@ -1,7 +1,13 @@
-"""
-Django admin registration for the wishlist app.
-"""
 from django.contrib import admin
+from .models import Wishlist, WishlistItem
 
 
-# TODO: Register wishlist models with admin.site.
+class WishlistItemInline(admin.TabularInline):
+    model = WishlistItem
+    extra = 0
+
+
+@admin.register(Wishlist)
+class WishlistAdmin(admin.ModelAdmin):
+    list_display = ("user",)
+    inlines = [WishlistItemInline]
