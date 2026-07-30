@@ -1,12 +1,11 @@
-"""
-Serializers for the wishlist app.
-
-Purpose: User wishlists and wishlist items.
-
-Serializers only handle (de)serialization + field-level validation.
-Cross-field / cross-model business rules belong in services.py.
-"""
 from rest_framework import serializers
+from apps.products.serializers import ProductListSerializer
+from .models import WishlistItem
 
 
-# TODO: Define wishlist serializers here.
+class WishlistItemSerializer(serializers.ModelSerializer):
+    product = ProductListSerializer(read_only=True)
+
+    class Meta:
+        model = WishlistItem
+        fields = ["id", "product", "created_at"]
