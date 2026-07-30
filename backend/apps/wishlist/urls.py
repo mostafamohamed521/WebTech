@@ -1,12 +1,9 @@
-"""
-URL routes for the wishlist app.
-
-Mounted under /api/v1/wishlist/ from core/urls.py.
-"""
 from django.urls import path
+from .views import WishlistView, WishlistItemDetailView
 
 app_name = "wishlist"
 
 urlpatterns = [
-    # TODO: Register wishlist endpoints here.
+    path("", WishlistView.as_view(), name="list-add"),
+    path("<uuid:product_id>/", WishlistItemDetailView.as_view(), name="remove"),
 ]
