@@ -1,0 +1,11 @@
+from django.apps import AppConfig
+
+
+class DashboardConfig(AppConfig):
+    """Configuration for the dashboard app.
+
+    Purpose: Admin dashboard aggregation endpoints.
+    """
+    default_auto_field = "django.db.models.BigAutoField"
+    name = "apps.dashboard"
+    verbose_name = "Dashboard"
