@@ -1,6 +1,6 @@
-# WEBTECH Backend — سجل عمليات Git
+# WEBTECH Backend — Git Commit Log
 
-سجل بكل الملفات اللي اتعملها في الجزء ده وأمر الـ git المستخدم لكل ملف:
+Chronological log of every file created in this part of the project, with the exact git command used for each:
 
 ```bash
 git add backend/apps/authentication/__init__.py
