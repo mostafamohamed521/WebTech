@@ -33,6 +33,13 @@ class AddressDetailView(APIView):
     def get_object(self, request, pk):
         return Address.objects.get(pk=pk, user=request.user, is_deleted=False)
 
+    def get(self, request, pk):
+        try:
+            address = self.get_object(request, pk)
+        except Address.DoesNotExist:
+            return error_response(message="Address not found", status=404)
+        return success_response(AddressSerializer(address).data, message="Address")
+
     def patch(self, request, pk):
         try:
             address = self.get_object(request, pk)
