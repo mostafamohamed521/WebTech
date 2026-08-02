@@ -5,7 +5,8 @@ import { ShoppingCart, Heart, User, Search } from "lucide-react";
 
 import { useAuthStore } from "@/store/authStore";
 import { useCart } from "@/hooks/useCart";
-import { useLogout } from "@/hooks/useAuth";
+import SearchOverlay from "./SearchOverlay";
+import NotificationBell from "./NotificationBell";
 
 /**
  * Navbar — transparent at top, blurs + shrinks on scroll (per WEBTECH
@@ -13,10 +14,10 @@ import { useLogout } from "@/hooks/useAuth";
  */
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const { isAuthenticated, user } = useAuthStore();
   const { data: cart } = useCart();
   const cartCount = cart?.items.length ?? 0;
-  const logout = useLogout();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
@@ -25,6 +26,7 @@ export default function Navbar() {
   }, []);
 
   return (
+    <>
     <motion.header
       animate={{
         backgroundColor: scrolled ? "rgba(5,5,5,0.7)" : "rgba(5,5,5,0)",
@@ -43,16 +45,16 @@ export default function Navbar() {
         <Link to="/category/smartphones" className="transition-colors hover:text-white">Smartphones</Link>
         <Link to="/category/laptops" className="transition-colors hover:text-white">Laptops</Link>
         <Link to="/category/gaming" className="transition-colors hover:text-white">Gaming</Link>
-        <Link to="/deals" className="transition-colors hover:text-white">Deals</Link>
       </nav>
 
       <div className="flex items-center gap-5 text-white/80">
-        <button aria-label="Search" className="transition-transform hover:scale-110">
+        <button onClick={() => setSearchOpen(true)} aria-label="Search" className="transition-transform hover:scale-110">
           <Search size={19} />
         </button>
-        <Link to="/wishlist" aria-label="Wishlist" className="transition-transform hover:scale-110">
+        <Link to="/account/wishlist" aria-label="Wishlist" className="transition-transform hover:scale-110">
           <Heart size={19} />
         </Link>
+        <NotificationBell />
         <Link to="/cart" aria-label="Cart" className="relative transition-transform hover:scale-110">
           <ShoppingCart size={19} />
           {cartCount > 0 && (
@@ -63,10 +65,10 @@ export default function Navbar() {
         </Link>
 
         {isAuthenticated ? (
-          <button onClick={() => logout.mutate()} className="flex items-center gap-1.5 text-sm transition-transform hover:scale-105">
+          <Link to="/account" className="flex items-center gap-1.5 text-sm transition-transform hover:scale-105">
             <User size={19} />
             <span className="hidden md:inline">{user?.first_name || user?.username}</span>
-          </button>
+          </Link>
         ) : (
           <Link to="/login" className="flex items-center gap-1.5 text-sm transition-transform hover:scale-105">
             <User size={19} />
@@ -75,5 +77,8 @@ export default function Navbar() {
         )}
       </div>
     </motion.header>
+
+    <SearchOverlay open={searchOpen} onClose={() => setSearchOpen(false)} />
+    </>
   );
 }
