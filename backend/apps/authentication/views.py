@@ -22,7 +22,8 @@ class RegisterView(APIView):
         serializer = RegisterSerializer(data=request.data)
         if not serializer.is_valid():
             return error_response(serializer.errors, message="Registration failed")
-        user, tokens = AuthService.register(serializer.validated_data)
+        session_key = request.headers.get("X-Session-Key")
+        user, tokens = AuthService.register(serializer.validated_data, session_key=session_key)
         return success_response(
             {"user": UserSerializer(user).data, "tokens": tokens},
             message="Account created successfully", status=201,
