@@ -17,7 +17,7 @@ from common.emails.tasks import send_welcome_email
 
 class AuthService:
     @staticmethod
-    def register(data: dict) -> tuple[User, dict]:
+    def register(data: dict, session_key: str | None = None) -> tuple[User, dict]:
         user = User.objects.create_user(
             email=data["email"],
             username=data["username"],
@@ -26,6 +26,9 @@ class AuthService:
             last_name=data.get("last_name", ""),
             phone=data.get("phone", ""),
         )
+        if session_key:
+            from apps.cart.services import CartService
+            CartService.merge_guest_cart_into_user(user, session_key)
         tokens = AuthService.issue_tokens(user)
         try:
             send_welcome_email.delay(user.email, user.first_name or user.username)
