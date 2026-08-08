@@ -124,6 +124,32 @@ webtech/
 └── README.md                         # this file
 ```
 
+## Design Update: Light Theme, Welcome Experience & New Animations
+
+The site shipped with a cinematic dark theme per the original design brief. Based on direct feedback, it went through a real conversion pass:
+
+- **Light theme, done properly** — not just lightened colors, a full conversion: every page background, card, border, and text color across ~30 files was systematically converted from the dark palette to a light one (`#F7F8FA` page background, white cards, `slate-*` text/borders). This caught and fixed real contrast bugs along the way — a notification dropdown that would've rendered white text on a white background, a loading spinner that would've been invisible, translucent "glass" cards that only worked against a near-black background and needed to become solid white + shadow instead. The Hero section and main navigation intentionally **stay dark** as a deliberate cinematic accent (a common premium-brand pattern — think Apple's dark hero sections on an otherwise light site).
+- **Welcome / loading splash screen** — the "Landing Experience" from the original animation spec, actually built: an animated WEBTECH logo reveal with soft glow, floating particles, and a progress bar, shown once per browser session before the Hero loads.
+- **New animations** — magnetic buttons (the CTA buttons subtly pull toward the cursor, per the original spec's "Magnetic Buttons" requirement that hadn't been implemented yet), and an animated stats section on the homepage with real, API-backed counters (product count, brand count) that count up when scrolled into view.
+
+**A note on that conversion:** the first automated pass (bulk find/replace across ~30 files) technically worked but produced an undisciplined result — 6 different scattered gray text shades, 3 different border shades, and leftover `backdrop-blur` on now-solid white elements that used to be translucent dark glass. A follow-up pass fixed this properly: consolidated down to exactly two text tones (`slate-900` primary, `slate-500` muted) and one consistent border tone (`slate-200`), removed the pointless blur, and — in the process of tightening things up — caught two real contrast bugs: the wishlist/quick-view icon buttons on product cards were rendering dark text directly on a dark image overlay (invisible), and the "Out of Stock" label had the same problem.
+
+**A more serious bug the "check everything again" request caught:** the Navbar was designed to start fully transparent at the top of every page (with white text) and only turn into a solid dark bar on scroll — which worked fine when the whole site was dark, because a transparent navbar over a dark Hero was still readable. After the light-theme conversion, every page *except* Home now has a light background, so that same transparent-white-text navbar became **invisible** the instant someone landed on `/cart`, `/login`, `/account`, or any other page at the top of the scroll. Fixed: the Navbar is now only transparent at the very top of the Home page (over the dark Hero) and solid everywhere else. While auditing this, also fixed a missing scroll-reset on route change (SPA navigation doesn't reset scroll position by default) and three places where a hover state had been accidentally consolidated to the exact same color as the resting state, making them appear unresponsive.
+
+## Compare Products
+
+A dedicated comparison feature — one of the original spec's requirements that had been missing. Add up to 4 products to compare from any product card or the product detail page (a `Scale` icon toggle); a floating bar appears showing the count with a "Compare Now" button. The `/compare` page renders a full side-by-side table — price, stock, warranty, and the union of every spec across the selected products (so it lines up correctly even when products don't share identical spec sets). The compare list persists in `localStorage`, so it survives a page refresh.
+
+While wiring this in, two more contrast bugs from the light-theme conversion surfaced and got fixed: a "Sale" badge with dark text on its blue background (nearly invisible), and a "Save address" button with no explicit text color at all, silently inheriting dark text onto the same blue background.
+
+## Design System Cleanup
+
+Real user feedback: the light-theme pages felt inconsistent with each other. The root cause was structural — every page had its own hand-written button/badge className strings, so styles quietly drifted apart edit after edit. This got fixed at the source, not just patched:
+
+- **One accent color.** The UI previously mixed blue, purple, and cyan decoratively across the Hero, badges, and icons with no real system behind which page got which color. Collapsed down to a single brand accent (blue) everywhere decorative; the only other colors that appear now are semantic (green = success/verified, amber = pending, red = danger) — the same convention every major design system uses, not random accents.
+- **Fixed a batch of leftover dark-theme colors** (`yellow-400`, `green-400`, `red-400`) that read fine against the old near-black background but had washed-out, poor contrast against the new white one — order status badges, low-stock warnings, and form error messages across ~10 files.
+- **Shared `Button` and `Badge` components**, the actual fix for the inconsistency complaint: every primary CTA (login, register, checkout, add to cart, save address...) now renders from one `Button` component with five defined variants, instead of five different pages each hand-rolling their own version of "the primary button" that could (and did) diverge.
+
 ## What's Implemented
 
 All 18 backend apps have real, tested implementations — not scaffolding. Each one was verified by running an actual Django dev server and hitting it with `curl` through the full flow (register, add to cart, checkout, admin actions, etc.) before being considered done.
@@ -170,9 +196,13 @@ Every page in this project can be populated with realistic content in one comman
 python manage.py seed_demo_data
 ```
 
-This creates **15 real brands** (Apple, Samsung, Sony, Dell, ASUS, Razer, Logitech, Bose, Nothing, JBL, Microsoft, Google, Corsair, LG, Canon), **12 categories**, and **31 realistic products** — actual product names (iPhone 15 Pro Max, MacBook Pro 16" M3 Max, Sony WH-1000XM5, ASUS ROG Ally...) with real specs, multiple images, color/storage variants where relevant, 2 working coupon codes, 4 demo customer accounts with completed orders, and ~20 reviews (several genuinely verified-purchase, tied to real seeded orders). It's idempotent — safe to run again.
+This creates **27 real brands** (Apple, Samsung, Sony, ASUS, Razer, NVIDIA, DJI, Meta, HP, Canon, and more) across **24 categories** — the original 12 (smartphones, laptops, gaming, monitors, keyboards, mouse, headphones, earbuds, speakers, tablets, smart watches, cameras) plus 12 more (gaming consoles, VR headsets, drones, smart home, networking, storage, graphics cards, processors, TVs, projectors, printers, streaming devices) — and **67 real products** with actual product names (iPhone 15 Pro Max, PlayStation 5, DJI Mini 4 Pro, NVIDIA GeForce RTX 4090, Meta Quest 3...), real specs, color/storage variants where relevant, 2 working coupon codes, 6 demo customer accounts with completed orders, and 50+ reviews (several genuinely verified-purchase, tied to real seeded orders).
 
-Verified live after seeding: Home's featured section, every category page, full-text search, product detail pages (specs/variants/reviews/related products), and the Admin Dashboard's stats and analytics charts all render real, non-empty data.
+**Images are real and category-relevant**, not random unrelated placeholders — each product's photos come from [LoremFlickr](https://loremflickr.com), a keyword-based real-photo service, so a drone product actually shows a real drone photo, a graphics card shows a real graphics card, etc. (Confirmed operational as of mid-2026, after Flickr lifted its earlier API restrictions.)
+
+It's idempotent — safe to run again.
+
+Verified live after seeding: Home's featured section, every one of the 24 category pages, full-text search, product detail pages (specs/variants/reviews/related products), and the Admin Dashboard's stats and analytics charts all render real, non-empty, category-appropriate data.
 
 ## Getting Started
 
@@ -222,7 +252,6 @@ Every file in this project was created or modified with its own `git add` + `git
 
 Everything functionally required for a working store is implemented and tested. Remaining ideas, roughly in priority order:
 
-- Product comparison page
 - Real payment gateway integration (Stripe/PayPal) behind the existing pluggable interface
 - Multi-warehouse allocation UI on top of the existing `Inventory` model
 - WebSocket-based live notifications (currently 30s polling)
