@@ -21,7 +21,7 @@ export default function StarRating({ value, onChange, size = 16 }: StarRatingPro
           <Star
             size={size}
             fill={star <= value ? "#3B82F6" : "transparent"}
-            stroke={star <= value ? "#3B82F6" : "#666"}
+            stroke={star <= value ? "#3B82F6" : "#CBD5E1"}
           />
         </button>
       ))}
