@@ -1,6 +1,8 @@
 import { lazy, Suspense } from "react";
 import { Routes, Route } from "react-router-dom";
 import Navbar from "@/components/layout/Navbar";
+import ScrollToTop from "@/components/layout/ScrollToTop";
+import CompareBar from "@/components/compare/CompareBar";
 import HomePage from "@/pages/Home/HomePage";
 
 // Route-level code splitting: everything except the landing page loads
@@ -14,6 +16,7 @@ const CheckoutPage = lazy(() => import("@/pages/Checkout/CheckoutPage"));
 const ProductDetailPage = lazy(() => import("@/pages/Product/ProductDetailPage"));
 const CategoryPage = lazy(() => import("@/pages/Category/CategoryPage"));
 const SearchResultsPage = lazy(() => import("@/pages/Search/SearchResultsPage"));
+const ComparePage = lazy(() => import("@/pages/Compare/ComparePage"));
 const SupportPage = lazy(() => import("@/pages/Support/SupportPage"));
 const NotFoundPage = lazy(() => import("@/pages/Errors/NotFoundPage"));
 
@@ -35,7 +38,7 @@ const AdminSupportPage = lazy(() => import("@/pages/Admin/AdminSupportPage"));
 function RouteFallback() {
   return (
     <div className="flex min-h-[60vh] items-center justify-center bg-background">
-      <div className="h-8 w-8 animate-spin rounded-full border-2 border-white/20 border-t-accent-blue" />
+      <div className="h-8 w-8 animate-spin rounded-full border-2 border-slate-200 border-t-accent-blue" />
     </div>
   );
 }
@@ -43,7 +46,9 @@ function RouteFallback() {
 export default function AppRoutes() {
   return (
     <>
+      <ScrollToTop />
       <Navbar />
+      <CompareBar />
       <Suspense fallback={<RouteFallback />}>
         <Routes>
           <Route path="/" element={<HomePage />} />
@@ -54,6 +59,7 @@ export default function AppRoutes() {
           <Route path="/product/:slug" element={<ProductDetailPage />} />
           <Route path="/category/:slug" element={<CategoryPage />} />
           <Route path="/search" element={<SearchResultsPage />} />
+          <Route path="/compare" element={<ComparePage />} />
           <Route path="/support" element={<SupportPage />} />
 
           <Route path="/account" element={<AccountLayout />}>
